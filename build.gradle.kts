@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "net.aariy"
-version = "1.0-SNAPSHOT"
+version = "1"
 
 repositories {
     mavenCentral()
