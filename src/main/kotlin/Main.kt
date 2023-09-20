@@ -41,6 +41,7 @@ class Main : ListenerAdapter() {
             .queue()
     }
     override fun onGuildMemberJoin(e: GuildMemberJoinEvent) {
+        e.guild.addRoleToMember(e.user, e.guild.getRoleById(NODE.get("welcome_role").asText())!!).queue()
         e.guild.createTextChannel(NODE.get("welcome_channel").asText(e.user.effectiveName).replace("@user", e.user.effectiveName))
             .addPermissionOverride(e.guild.publicRole, 0, 1024)
             .addPermissionOverride(e.member, 1024, 0)
@@ -49,7 +50,6 @@ class Main : ListenerAdapter() {
                 NODE.get("welcome_message").asText(e.user.asMention).replace("@user", e.user.asMention)
             ).queue()
         }
-        e.guild.addRoleToMember(e.user, e.guild.getRoleById(NODE.get("welcome_role").asText())!!).queue()
     }
 
     override fun onSlashCommandInteraction(e: SlashCommandInteractionEvent) {
