@@ -24,6 +24,7 @@ import java.security.SecureRandom
 fun main(args: Array<String>) {
     Main().main(args)
 }
+
 class Main : ListenerAdapter() {
     lateinit var FILE: File
     lateinit var NODE: ObjectNode
@@ -54,6 +55,7 @@ class Main : ListenerAdapter() {
             )
             .queue()
     }
+
     override fun onGuildMemberJoin(e: GuildMemberJoinEvent) {
         // welcome_roleに設定されているIDからギルドのロールを取得して、付与
         e.guild.addRoleToMember(e.user, e.guild.getRoleById(NODE.get("welcome_role").asText())!!).queue()
@@ -145,6 +147,7 @@ class Main : ListenerAdapter() {
         }
 
     }
+
     private fun json() {
         // データ保存
         val bw = BufferedWriter(FileWriter(FILE))
