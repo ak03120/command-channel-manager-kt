@@ -92,14 +92,16 @@ class Main : ListenerAdapter() {
                     "add" -> {
                         e.replyModal(
                             Modal.create("auto-message-modal", "キーワード応答")
-                                .addActionRow(TextInput.create("keyword", "キーワード(部分一致と全文一致の両方)", TextInputStyle.SHORT).setRequired(true).build())
+                                .addActionRow(TextInput.create("type", "全文一致は1、部分一致は2を入力", TextInputStyle.SHORT).setRequired(true).build())
+                                .addActionRow(TextInput.create("keyword", "キーワード", TextInputStyle.SHORT).setRequired(true).build())
                                 .addActionRow(TextInput.create("reply", "応答メッセージ(ランダムにするには1メッセージごとに改行してください)", TextInputStyle.PARAGRAPH).setRequired(true).build())
                                 .build()
                         ).queue()
                         return@let 0
                     }
                     "remove" -> {
-                        (NODE.get("keywords") as ObjectNode).remove(e.getOption("キーワード")!!.asString)
+                        (NODE.get("keywords_all") as ObjectNode).remove(e.getOption("キーワード")!!.asString)
+                        (NODE.get("keywords_part") as ObjectNode).remove(e.getOption("キーワード")!!.asString)
                         json()
                         return@let 200
                     }
@@ -120,7 +122,12 @@ class Main : ListenerAdapter() {
     override fun onModalInteraction(e: ModalInteractionEvent) {
         val code = when(e.modalId) {
             "auto-message-modal" -> let {
-                val array = (NODE.get("keywords") as ObjectNode).putArray(e.getValue("keyword")?.asString)
+                val array = if (e.getValue("type")!!.asString.equals("1"))
+                    (NODE.get("keywords_all") as ObjectNode).putArray(e.getValue("keyword")?.asString)
+                else if (e.getValue("type")!!.asString.equals("2"))
+                    (NODE.get("keywords_part") as ObjectNode).putArray(e.getValue("keyword")?.asString)
+                else
+                    return@let 400
                 e.getValue("reply")!!.asString.split("\n").forEach { s ->
                     array.add(s)
                 }
@@ -131,6 +138,7 @@ class Main : ListenerAdapter() {
         }
         when (code) {
             200 -> e.reply("> 設定を変更しました。").queue()
+            400 -> e.reply("> 引数が間違っています。").queue()
             403 -> e.reply("> 権限がありません。").queue()
             404 -> e.reply("> 不明なコマンドです。").queue()
         }
@@ -138,10 +146,17 @@ class Main : ListenerAdapter() {
     }
 
     override fun onMessageReceived(e: MessageReceivedEvent) {
-        NODE.get("keywords").fieldNames().forEach {
+        NODE.get("keywords_all").fieldNames().forEach {
+            if (e.message.contentDisplay == it && !e.member!!.user.isBot) {
+                val sr = SecureRandom()
+                e.message.reply(NODE.get("keywords_all").get(it).get(sr.nextInt(NODE.get("keywords_all").get(it).size())).textValue()).queue()
+                return
+            }
+        }
+        NODE.get("keywords_part").fieldNames().forEach {
             if (e.message.contentDisplay.contains(it) && !e.member!!.user.isBot) {
                 val sr = SecureRandom()
-                e.message.reply(NODE.get("keywords").get(it).get(sr.nextInt(NODE.get("keywords").get(it).size())).textValue()).queue()
+                e.message.reply(NODE.get("keywords_part").get(it).get(sr.nextInt(NODE.get("keywords_part").get(it).size())).textValue()).queue()
                 return
             }
         }
