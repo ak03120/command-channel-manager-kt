@@ -122,14 +122,13 @@ class Main : ListenerAdapter() {
     override fun onModalInteraction(e: ModalInteractionEvent) {
         val code = when(e.modalId) {
             "auto-message-modal" -> let {
-                val array = if (e.getValue("type")!!.asString.equals("1"))
-                    (NODE.get("keywords_all") as ObjectNode).putArray(e.getValue("keyword")?.asString)
-                else if (e.getValue("type")!!.asString.equals("2"))
-                    (NODE.get("keywords_part") as ObjectNode).putArray(e.getValue("keyword")?.asString)
-                else
-                    return@let 400
+                val array = when (e.getValue("type")!!.asString) {
+                    "1" -> (NODE.get("keywords_all") as ObjectNode).putArray(e.getValue("keyword")?.asString)
+                    "2" -> (NODE.get("keywords_part") as ObjectNode).putArray(e.getValue("keyword")?.asString)
+                    else -> return@let 400
+                }
                 e.getValue("reply")!!.asString.split("\n").forEach { s ->
-                    array.add(s)
+                    array.add(s) // 返信候補に追加
                 }
                 json()
                 return@let 200
@@ -148,15 +147,15 @@ class Main : ListenerAdapter() {
     override fun onMessageReceived(e: MessageReceivedEvent) {
         NODE.get("keywords_all").fieldNames().forEach {
             if (e.message.contentDisplay == it && !e.member!!.user.isBot) {
-                val sr = SecureRandom()
-                e.message.reply(NODE.get("keywords_all").get(it).get(sr.nextInt(NODE.get("keywords_all").get(it).size())).textValue()).queue()
+                val index = SecureRandom().nextInt(NODE.get("keywords_all").get(it).size()) // 返信候補のインデックスを生成
+                e.message.reply(NODE.get("keywords_all").get(it).get(index).textValue()).queue()
                 return
             }
         }
         NODE.get("keywords_part").fieldNames().forEach {
             if (e.message.contentDisplay.contains(it) && !e.member!!.user.isBot) {
-                val sr = SecureRandom()
-                e.message.reply(NODE.get("keywords_part").get(it).get(sr.nextInt(NODE.get("keywords_part").get(it).size())).textValue()).queue()
+                val index = SecureRandom().nextInt(NODE.get("keywords_part").get(it).size()) // 返信候補のインデックスを生成
+                e.message.reply(NODE.get("keywords_part").get(it).get(index).textValue()).queue()
                 return
             }
         }
