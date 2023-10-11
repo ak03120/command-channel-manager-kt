@@ -42,8 +42,9 @@ class Main : ListenerAdapter() {
             .queue()
     }
     override fun onGuildMemberJoin(e: GuildMemberJoinEvent) {
+        if (e.guild.getRoleById(NODE.get("welcome_role").asText()) != null)
         // welcome_roleに設定されているIDからギルドのロールを取得して、付与
-        e.guild.addRoleToMember(e.user, e.guild.getRoleById(NODE.get("welcome_role").asText())!!).queue()
+            e.guild.addRoleToMember(e.user, e.guild.getRoleById(NODE.get("welcome_role").asText())!!).queue()
         // welcome_channelの設定値のチャンネルを作成
         e.guild.createTextChannel(NODE.get("welcome_channel").asText(e.user.effectiveName).replace("@user", e.user.effectiveName))
             .addPermissionOverride(e.guild.publicRole, 0, 1024)
