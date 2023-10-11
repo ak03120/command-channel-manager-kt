@@ -1,5 +1,7 @@
 {
   "welcome_message": "@user",
   "welcome_role": "0",
-  "welcome_channel": "@user"
+  "welcome_channel": "@user",
+  "keywords_all": { },
+  "keywords_part": { }
 }
