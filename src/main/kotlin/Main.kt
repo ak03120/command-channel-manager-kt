@@ -64,6 +64,7 @@ class Main : ListenerAdapter() {
         e.guild.createTextChannel(NODE.get("welcome_channel").asText(e.user.effectiveName).replace("@user", e.user.effectiveName))
             .addPermissionOverride(e.guild.publicRole, 0, 1024)
             .addPermissionOverride(e.member, 1024, 0)
+            .addMemberPermissionOverride(1172276056611360813, 1024, 0)
             .queue { c ->
                 // ようこそメッセージを作ったチャンネルで送信
             c.sendMessage(
