@@ -3,5 +3,7 @@
   "welcome_role": "0",
   "welcome_channel": "@user",
   "keywords_all": { },
-  "keywords_part": { }
+  "keywords_part": { },
+  "staff_user": ["1172276056611360813","1176740123874951209","1178942199967264859"],
+  "staff_role": []
 }

@@ -1,7 +1,9 @@
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import net.dv8tion.jda.api.JDABuilder
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
@@ -15,6 +17,7 @@ import net.dv8tion.jda.api.interactions.components.text.TextInput
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle
 import net.dv8tion.jda.api.interactions.modals.Modal
 import net.dv8tion.jda.api.requests.GatewayIntent
+import net.dv8tion.jda.api.requests.restaction.ChannelAction
 import net.dv8tion.jda.api.utils.MemberCachePolicy
 import java.io.BufferedWriter
 import java.io.File
@@ -53,6 +56,20 @@ class Main : ListenerAdapter() {
                         SubcommandData("remove", "自動応答メッセージを削除します")
                             .addOption(OptionType.STRING, "キーワード", "削除対象キーワード", true)
                     ),
+                Commands.slash("staff-user", "スタッフユーザーを管理します")
+                    .addSubcommands(
+                        SubcommandData("add", "スタッフユーザーを追加します")
+                            .addOption(OptionType.USER, "ユーザー", "スタッフユーザー", true),
+                        SubcommandData("remove", "スタッフユーザーを削除します")
+                            .addOption(OptionType.USER, "ユーザー", "スタッフユーザー", true)
+                    ),
+                Commands.slash("staff-role", "スタッフロールを管理します")
+                    .addSubcommands(
+                        SubcommandData("add", "スタッフロールを追加します")
+                            .addOption(OptionType.ROLE, "ロール", "スタッフロール", true),
+                        SubcommandData("remove", "スタッフロールを削除します")
+                            .addOption(OptionType.ROLE, "ロール", "スタッフロール", true)
+                    ),
                 Commands.slash("exec", "利用不可")
                     .setDefaultPermissions(DefaultMemberPermissions.DISABLED)
             )
@@ -64,11 +81,16 @@ class Main : ListenerAdapter() {
         // welcome_roleに設定されているIDからギルドのロールを取得して、付与
             e.guild.addRoleToMember(e.user, e.guild.getRoleById(NODE.get("welcome_role").asText())!!).queue()
         // welcome_channelの設定値のチャンネルを作成
-        e.guild.createTextChannel(NODE.get("welcome_channel").asText(e.user.effectiveName).replace("@user", e.user.effectiveName))
+        val newChannel: ChannelAction<TextChannel> = e.guild.createTextChannel(NODE.get("welcome_channel").asText(e.user.effectiveName).replace("@user", e.user.effectiveName))
             .addPermissionOverride(e.guild.publicRole, 0, 1024)
             .addPermissionOverride(e.member, 1024, 0)
-            .addMemberPermissionOverride(1172276056611360813, 1024, 0)
-            .queue { c ->
+        for (i in 0..<NODE.get("staff_user").size()) {
+            newChannel.addMemberPermissionOverride(NODE.get("staff_user").get(i).asLong(), 1024, 0)
+        }
+        for (i in 0..<NODE.get("staff_role").size()) {
+            newChannel.addRolePermissionOverride(NODE.get("staff_role").get(i).asLong(), 1024, 0)
+        }
+        newChannel.queue { c ->
                 // ようこそメッセージを作ったチャンネルで送信
             c.sendMessage(
                 NODE.get("welcome_message").asText(e.user.asMention).replace("@user", e.user.asMention)
@@ -107,7 +129,38 @@ class Main : ListenerAdapter() {
                     "remove" -> {
                         (NODE.get("keywords_all") as ObjectNode).remove(e.getOption("キーワード")!!.asString)
                         (NODE.get("keywords_part") as ObjectNode).remove(e.getOption("キーワード")!!.asString)
-                        json()
+                        return@let 200
+                    }
+                    else -> 404
+                }
+            }
+            "staff-user" -> let {
+                when(e.subcommandName) {
+                    "add" -> {
+                        (NODE.get("staff_user") as ArrayNode).add(e.getOption("ユーザー")!!.asLong)
+                        return@let 200
+                    }
+                    "remove" -> {
+                        for(i in 0..<(NODE.get("staff_user") as ArrayNode).size()) {
+                            if((NODE.get("staff_user") as ArrayNode).get(i).asLong() == e.getOption("ユーザー")!!.asLong)
+                                (NODE.get("staff_user") as ArrayNode).remove(i)
+                        }
+                        return@let 200
+                    }
+                    else -> 404
+                }
+            }
+            "staff-role" -> let {
+                when(e.subcommandName) {
+                    "add" -> {
+                        (NODE.get("staff_role") as ArrayNode).add(e.getOption("ロール")!!.asLong)
+                        return@let 200
+                    }
+                    "remove" -> {
+                        for(i in 0..<(NODE.get("staff_role") as ArrayNode).size()) {
+                            if((NODE.get("staff_role") as ArrayNode).get(i).asLong() == e.getOption("ロール")!!.asLong)
+                                (NODE.get("staff_role") as ArrayNode).remove(i)
+                        }
                         return@let 200
                     }
                     else -> 404
