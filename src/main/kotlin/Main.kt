@@ -14,6 +14,8 @@ import java.io.FileWriter
 fun main(args: Array<String>) {
     Main().main(args)
 }
+
+@Suppress("KotlinConstantConditions")
 class Main : ListenerAdapter() {
     lateinit var FILE: File
     lateinit var NODE: ObjectNode
@@ -28,7 +30,8 @@ class Main : ListenerAdapter() {
             .updateCommands()
             .addCommands(
                 Commands.slash("scrim", "管理者と実行者のテキストチャンネルを作成します。")
-                    .addOption(OptionType.STRING, "コマンド", "要件"),
+                    .addOption(OptionType.STRING, "コマンド", "要件")
+                    .addOption(OptionType.STRING, "チャンネル", "作成されるチャンネル名"),
                 Commands.slash("set-message", "チャンネル作成時のメッセージを編集します。")
                     .addOption(OptionType.STRING, "メッセージ", "チャンネル作成時に送信するメッセージ"),
                 Commands.slash("delete-channel", "チャンネルを削除します。")
@@ -43,7 +46,7 @@ class Main : ListenerAdapter() {
                 200
             }
             "scrim" -> {
-                e.guild!!.createTextChannel("専用チャンネル")
+                e.guild!!.createTextChannel(e.getOption("チャンネル")!!.asString)
                     .addPermissionOverride(e.guild!!.publicRole, 0, 1024)
                     .addMemberPermissionOverride(e.member!!.id.toLong(), 1024, 0)
                     .queue { c ->
