@@ -30,8 +30,8 @@ class Main : ListenerAdapter() {
             .updateCommands()
             .addCommands(
                 Commands.slash("scrim", "管理者と実行者のテキストチャンネルを作成します。")
-                    .addOption(OptionType.STRING, "コマンド", "要件")
-                    .addOption(OptionType.STRING, "チャンネル", "作成されるチャンネル名", true),
+                    .addOption(OptionType.STRING, "チャンネル", "作成されるチャンネル名", true)
+                    .addOption(OptionType.STRING, "コマンド", "要件"),
                 Commands.slash("set-message", "チャンネル作成時のメッセージを編集します。")
                     .addOption(OptionType.STRING, "メッセージ", "チャンネル作成時に送信するメッセージ", true),
                 Commands.slash("delete-channel", "チャンネルを削除します。")
