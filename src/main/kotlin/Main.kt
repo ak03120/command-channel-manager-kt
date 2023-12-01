@@ -6,8 +6,6 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.hooks.ListenerAdapter
 import net.dv8tion.jda.api.interactions.commands.OptionType
 import net.dv8tion.jda.api.interactions.commands.build.Commands
-import net.dv8tion.jda.api.requests.GatewayIntent
-import net.dv8tion.jda.api.utils.MemberCachePolicy
 import java.io.BufferedWriter
 import java.io.File
 import java.io.FileWriter
@@ -16,7 +14,6 @@ import java.io.FileWriter
 fun main(args: Array<String>) {
     Main().main(args)
 }
-
 class Main : ListenerAdapter() {
     lateinit var FILE: File
     lateinit var NODE: ObjectNode
@@ -26,8 +23,6 @@ class Main : ListenerAdapter() {
         else File("build/resources/main/data.json")
         NODE = ObjectMapper().readTree(FILE).deepCopy()
         JDABuilder.createDefault(args[0])
-            .enableIntents(GatewayIntent.GUILD_MEMBERS, GatewayIntent.MESSAGE_CONTENT)
-            .setMemberCachePolicy(MemberCachePolicy.ALL)
             .addEventListeners(this)
             .build()
             .updateCommands()
