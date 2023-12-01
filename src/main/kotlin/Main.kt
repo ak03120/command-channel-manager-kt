@@ -30,25 +30,30 @@ class Main : ListenerAdapter() {
                 Commands.slash("scrim", "管理者と実行者のテキストチャンネルを作成します。")
                     .addOption(OptionType.STRING, "コマンド", "要件"),
                 Commands.slash("set-message", "チャンネル作成時のメッセージを編集します。")
-                    .addOption(OptionType.STRING, "メッセージ", "チャンネル作成時に送信するメッセージ")
+                    .addOption(OptionType.STRING, "メッセージ", "チャンネル作成時に送信するメッセージ"),
+                Commands.slash("delete-channel", "チャンネルを削除します。")
             )
             .queue()
     }
 
     override fun onSlashCommandInteraction(e: SlashCommandInteractionEvent) {
         val code = when(e.name) {
-            "set-message" -> let {
+            "set-message" -> {
                 NODE.put("message", e.getOption("メッセージ")?.asString) // 設定値を保存（内部的に）
-                return@let 200
+                200
             }
-            "scrim" -> let {
+            "scrim" -> {
                 e.guild!!.createTextChannel("専用チャンネル")
                     .addPermissionOverride(e.guild!!.publicRole, 0, 1024)
                     .addMemberPermissionOverride(e.member!!.id.toLong(), 1024, 0)
                     .queue { c ->
                         c.sendMessage(NODE.get("message").asText("初期メッセージ").replace("@user", e.user.asMention)).queue()
                     }
-                return@let 200
+                200
+            }
+            "delete-channel" -> {
+                e.channel.delete().queue()
+                200
             }
             else -> 404
         }
