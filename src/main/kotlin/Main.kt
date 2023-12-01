@@ -46,9 +46,9 @@ class Main : ListenerAdapter() {
                 200
             }
             "scrim" -> {
-                e.guild!!.createTextChannel(e.getOption("チャンネル")!!.asString)
+                e.guild!!.createTextChannel(e.getOption("チャンネル")!!.asString) // Nullになりえない
                     .addPermissionOverride(e.guild!!.publicRole, 0, 1024)
-                    .addMemberPermissionOverride(e.member!!.id.toLong(), 1024, 0)
+                    .addMemberPermissionOverride(e.member!!.id.toLong(), 1024, 0) // Nullになりえない
                     .queue { c ->
                         c.sendMessage(NODE.get("message").asText("初期メッセージ").replace("@user", e.user.asMention)).queue()
                     }
