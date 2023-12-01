@@ -51,7 +51,7 @@ class Main : ListenerAdapter() {
                     .addPermissionOverride(e.guild!!.publicRole, 0, 1024)
                     .addMemberPermissionOverride(e.member!!.id.toLong(), 1024, 0)
                     .queue { c ->
-                        c.sendMessage(NODE.get("message").asText("初期メッセージ").replace("@user", e.user.asMention))
+                        c.sendMessage(NODE.get("message").asText("初期メッセージ").replace("@user", e.user.asMention)).queue()
                     }
                 return@let 200
             }
