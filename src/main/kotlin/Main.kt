@@ -2,6 +2,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
+import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.JDABuilder
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent
@@ -226,6 +227,13 @@ class Main : ListenerAdapter() {
                 e.message.reply(NODE.get("keywords_part").get(it).get(index).textValue()).queue()
                 return
             }
+        }
+        if (e.message.channel.asTextChannel().parentCategory != null) {
+            val em: EmbedBuilder =
+                EmbedBuilder().setAuthor(e.author.name, null, e.author.avatarUrl).setDescription(e.message.contentRaw)
+                    .setTimestamp(e.message.timeCreated)
+            e.guild.getTextChannelById("1194853669590532106")!!.sendMessage(e.message.jumpUrl).setEmbeds(em.build())
+                .queue()
         }
 
     }
