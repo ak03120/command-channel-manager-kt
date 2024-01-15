@@ -85,7 +85,7 @@ class Main : ListenerAdapter() {
             val timer = Timer()
             val cl: Calendar = Calendar.getInstance()
             cl.add(Calendar.DATE, 1)
-            cl.set(Calendar.HOUR_OF_DAY, 0)
+            cl.set(Calendar.HOUR_OF_DAY, 17)
             cl.set(Calendar.MINUTE, 0)
             cl.set(Calendar.SECOND, 0)
             cl.set(Calendar.MILLISECOND, 0)
