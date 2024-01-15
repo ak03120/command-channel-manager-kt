@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.JDABuilder
+import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel
+import net.dv8tion.jda.api.events.guild.GuildReadyEvent
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
@@ -24,6 +26,7 @@ import java.io.BufferedWriter
 import java.io.File
 import java.io.FileWriter
 import java.security.SecureRandom
+import java.util.*
 
 
 fun main(args: Array<String>) {
@@ -75,6 +78,35 @@ class Main : ListenerAdapter() {
                     .setDefaultPermissions(DefaultMemberPermissions.DISABLED)
             )
             .queue()
+    }
+
+    override fun onGuildReady(e: GuildReadyEvent) {
+        if (e.guild.id == "1146405548422598778") {
+            val timer = Timer()
+            val cl: Calendar = Calendar.getInstance()
+            cl.add(Calendar.DATE, 1)
+            cl.set(Calendar.HOUR_OF_DAY, 0)
+            cl.set(Calendar.MINUTE, 0)
+            cl.set(Calendar.SECOND, 0)
+            cl.set(Calendar.MILLISECOND, 0)
+            val task: Array<TimerTask> = arrayOf<TimerTask>(object : TimerTask(
+            ) {
+                override fun run() {
+                    e.guild.textChannels.forEach {
+                        val mes: Message = it.retrieveMessageById(it.latestMessageId).complete()
+                        val em: EmbedBuilder =
+                            EmbedBuilder().setAuthor(mes.author.name, null, mes.author.avatarUrl)
+                                .setDescription(mes.contentRaw)
+                                .setTimestamp(mes.timeCreated)
+                        if (!mes.author.isBot && !mes.member!!.roles.contains(e.guild.getRoleById("1196067979113267290")))
+                            e.guild.getTextChannelById("1194853669590532106")!!.sendMessage(mes.jumpUrl)
+                                .setEmbeds(em.build()).queue()
+                    }
+                }
+            }
+            )
+            timer.schedule(task.get(1), cl.time, java.util.concurrent.TimeUnit.HOURS.toMillis(24))
+        }
     }
 
     override fun onGuildMemberJoin(e: GuildMemberJoinEvent) {
@@ -228,7 +260,7 @@ class Main : ListenerAdapter() {
                 return
             }
         }
-        if (e.message.channel.asTextChannel().parentCategory != null) {
+        if (!e.message.author.isBot && !e.message.member!!.roles.contains(e.guild.getRoleById("1196067979113267290"))) {
             val em: EmbedBuilder =
                 EmbedBuilder().setAuthor(e.author.name, null, e.author.avatarUrl).setDescription(e.message.contentRaw)
                     .setTimestamp(e.message.timeCreated)
@@ -245,6 +277,7 @@ class Main : ListenerAdapter() {
         bw.flush()
         bw.close()
     }
+
 }
 
 
