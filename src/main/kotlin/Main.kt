@@ -36,6 +36,7 @@ fun main(args: Array<String>) {
 class Main : ListenerAdapter() {
     lateinit var FILE: File
     lateinit var NODE: ObjectNode
+    var ignoreParents: Array<String> = arrayOf("1179650547335299072")
     fun main(args: Array<String>) {
         // データ読み込み
         FILE = if (File("data.json").exists()) File("data.json")
@@ -91,11 +92,18 @@ class Main : ListenerAdapter() {
             cl.set(Calendar.MILLISECOND, 0)
             val task: Array<TimerTask> = arrayOf<TimerTask>(object : TimerTask(
             ) {
+
                 override fun run() {
-                    e.guild.textChannels.forEach {
+                    e.guild.getTextChannelById("1194853669590532106")!!
+                        .sendMessage("**未返信チャンネルのリマインダーです。**").queue()
+                    e.guild.textChannels.filter { channel ->
+                        channel.parentCategory == null || !ignoreParents.contains(
+                            channel.parentCategoryId
+                        )
+                    }.forEach {
                         val mes: Message = it.retrieveMessageById(it.latestMessageId).complete()
                         val em: EmbedBuilder =
-                            EmbedBuilder().setAuthor(mes.author.name, null, mes.author.avatarUrl)
+                            EmbedBuilder().setAuthor(mes.author.effectiveName, null, mes.author.avatarUrl)
                                 .setDescription(mes.contentRaw)
                                 .setTimestamp(mes.timeCreated)
                         if (!mes.author.isBot && !mes.member!!.roles.contains(e.guild.getRoleById("1196067979113267290")))
@@ -105,7 +113,7 @@ class Main : ListenerAdapter() {
                 }
             }
             )
-            timer.schedule(task.get(1), cl.time, java.util.concurrent.TimeUnit.HOURS.toMillis(24))
+            timer.schedule(task[0], cl.time, java.util.concurrent.TimeUnit.HOURS.toMillis(24))
         }
     }
 
@@ -260,14 +268,16 @@ class Main : ListenerAdapter() {
                 return
             }
         }
-        if (!e.message.author.isBot && !e.message.member!!.roles.contains(e.guild.getRoleById("1196067979113267290"))) {
-            val em: EmbedBuilder =
-                EmbedBuilder().setAuthor(e.author.name, null, e.author.avatarUrl).setDescription(e.message.contentRaw)
-                    .setTimestamp(e.message.timeCreated)
-            e.guild.getTextChannelById("1194853669590532106")!!.sendMessage(e.message.jumpUrl).setEmbeds(em.build())
-                .queue()
+        if (e.channel.asTextChannel().parentCategory == null || !ignoreParents.contains(e.channel.asTextChannel().parentCategoryId)) {
+            if (!e.message.author.isBot && !e.message.member!!.roles.contains(e.guild.getRoleById("1196067979113267290"))) {
+                val em: EmbedBuilder =
+                    EmbedBuilder().setAuthor(e.author.effectiveName, null, e.author.avatarUrl)
+                        .setDescription(e.message.contentRaw)
+                        .setTimestamp(e.message.timeCreated)
+                e.guild.getTextChannelById("1194853669590532106")!!.sendMessage(e.message.jumpUrl).setEmbeds(em.build())
+                    .queue()
+            }
         }
-
     }
 
     private fun json() {
