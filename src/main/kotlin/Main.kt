@@ -21,6 +21,7 @@ import net.dv8tion.jda.api.interactions.components.text.TextInputStyle
 import net.dv8tion.jda.api.interactions.modals.Modal
 import net.dv8tion.jda.api.requests.GatewayIntent
 import net.dv8tion.jda.api.requests.restaction.ChannelAction
+import net.dv8tion.jda.api.utils.ChunkingFilter
 import net.dv8tion.jda.api.utils.MemberCachePolicy
 import java.io.BufferedWriter
 import java.io.File
@@ -46,6 +47,7 @@ class Main : ListenerAdapter() {
         NODE = ObjectMapper().readTree(FILE).deepCopy()
         JDABuilder.createDefault(args[0])
             .enableIntents(GatewayIntent.GUILD_MEMBERS, GatewayIntent.MESSAGE_CONTENT)
+            .setChunkingFilter(ChunkingFilter.ALL)
             .setMemberCachePolicy(MemberCachePolicy.ALL)
             .addEventListeners(this)
             .build()
@@ -94,7 +96,7 @@ class Main : ListenerAdapter() {
             val task: Array<TimerTask> = arrayOf<TimerTask>(object : TimerTask(
             ) {
                 override fun run() {
-                    e.guild.getTextChannelById("1194853669590532106")!!
+                    e.guild.getTextChannelById("1197012382204039188")!!
                         .sendMessage("**未返信チャンネルのリマインダーです。**").queue()
                     e.guild.textChannels.filter { channel ->
                         channel.parentCategory == null || !ignoreParents.contains(
@@ -108,8 +110,13 @@ class Main : ListenerAdapter() {
                                 .setTimestamp(mes.timeCreated)
                         if (mes.attachments.size > 0)
                             em.setImage(mes.attachments[0].url)
-                        if (!mes.author.isBot && !mes.member!!.roles.contains(e.guild.getRoleById("1196067979113267290")))
-                            e.guild.getTextChannelById("1194853669590532106")!!.sendMessage(mes.jumpUrl)
+                        if (!mes.author.isBot && mes.member != null && !mes.member!!.roles.contains(
+                                e.guild.getRoleById(
+                                    "1196067979113267290"
+                                )
+                            )
+                        )
+                            e.guild.getTextChannelById("1197012382204039188")!!.sendMessage(mes.jumpUrl)
                                 .setEmbeds(em.build()).queue()
                     }
                 }
@@ -211,9 +218,9 @@ class Main : ListenerAdapter() {
                 }
             }
             "exec" -> let {
-                e.deferReply().setEphemeral(true)
+                e.deferReply().setEphemeral(true).queue()
                 if (e.user.id == "310554809910558720") {
-                    timer.schedule(timerTask[0], 1000)
+                    timerTask[0].run()
                     e.reply("Successfully executed.").setEphemeral(true)
                 }
                 return@let 0
@@ -277,7 +284,7 @@ class Main : ListenerAdapter() {
                         .setTimestamp(e.message.timeCreated)
                 if (e.message.attachments.size > 0)
                     em.setImage(e.message.attachments[0].url)
-                e.guild.getTextChannelById("1194853669590532106")!!.sendMessage(e.message.jumpUrl).setEmbeds(em.build())
+                e.guild.getTextChannelById("1197012382204039188")!!.sendMessage(e.message.jumpUrl).setEmbeds(em.build())
                     .queue()
             }
         }
