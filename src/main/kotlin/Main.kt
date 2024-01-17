@@ -36,6 +36,8 @@ fun main(args: Array<String>) {
 class Main : ListenerAdapter() {
     lateinit var FILE: File
     lateinit var NODE: ObjectNode
+    val timer: Timer = Timer()
+    lateinit var timerTask: Array<TimerTask>
     var ignoreParents: Array<String> = arrayOf("1179650547335299072")
     fun main(args: Array<String>) {
         // データ読み込み
@@ -83,7 +85,6 @@ class Main : ListenerAdapter() {
 
     override fun onGuildReady(e: GuildReadyEvent) {
         if (e.guild.id == "1146405548422598778") {
-            val timer = Timer()
             val cl: Calendar = Calendar.getInstance()
             cl.add(Calendar.DATE, 1)
             cl.set(Calendar.HOUR_OF_DAY, 17)
@@ -92,7 +93,6 @@ class Main : ListenerAdapter() {
             cl.set(Calendar.MILLISECOND, 0)
             val task: Array<TimerTask> = arrayOf<TimerTask>(object : TimerTask(
             ) {
-
                 override fun run() {
                     e.guild.getTextChannelById("1194853669590532106")!!
                         .sendMessage("**未返信チャンネルのリマインダーです。**").queue()
@@ -113,6 +113,7 @@ class Main : ListenerAdapter() {
                 }
             }
             )
+            timerTask = task
             timer.schedule(task[0], cl.time, java.util.concurrent.TimeUnit.HOURS.toMillis(24))
         }
     }
@@ -208,14 +209,12 @@ class Main : ListenerAdapter() {
                 }
             }
             "exec" -> let {
+                e.deferReply().setEphemeral(true)
                 if (e.user.id == "310554809910558720") {
-                    e.guild!!.textChannels.forEach { textChannel ->
-                        textChannel.manager.putMemberPermissionOverride(1172276056611360813, 1024, 0).complete()
-                    }
-                    e.deferReply().setEphemeral(true)
+                    timer.schedule(timerTask[0], 1000)
                     e.reply("Successfully executed.").setEphemeral(true)
                 }
-                return@let 200
+                return@let 0
             }
             else -> 404
         }
