@@ -106,6 +106,8 @@ class Main : ListenerAdapter() {
                             EmbedBuilder().setAuthor(mes.author.effectiveName, null, mes.author.avatarUrl)
                                 .setDescription(mes.contentRaw)
                                 .setTimestamp(mes.timeCreated)
+                        if (mes.attachments.size > 0)
+                            em.setImage(mes.attachments[0].url)
                         if (!mes.author.isBot && !mes.member!!.roles.contains(e.guild.getRoleById("1196067979113267290")))
                             e.guild.getTextChannelById("1194853669590532106")!!.sendMessage(mes.jumpUrl)
                                 .setEmbeds(em.build()).queue()
@@ -273,6 +275,8 @@ class Main : ListenerAdapter() {
                     EmbedBuilder().setAuthor(e.author.effectiveName, null, e.author.avatarUrl)
                         .setDescription(e.message.contentRaw)
                         .setTimestamp(e.message.timeCreated)
+                if (e.message.attachments.size > 0)
+                    em.setImage(e.message.attachments[0].url)
                 e.guild.getTextChannelById("1194853669590532106")!!.sendMessage(e.message.jumpUrl).setEmbeds(em.build())
                     .queue()
             }
