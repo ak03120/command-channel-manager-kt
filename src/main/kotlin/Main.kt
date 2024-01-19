@@ -28,6 +28,7 @@ import java.io.File
 import java.io.FileWriter
 import java.security.SecureRandom
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 
 fun main(args: Array<String>) {
@@ -123,7 +124,7 @@ class Main : ListenerAdapter() {
             }
             )
             timerTask = task
-            timer.schedule(task[0], cl.time, java.util.concurrent.TimeUnit.HOURS.toMillis(24))
+            timer.schedule(task[0], cl.time, TimeUnit.DAYS.toMillis(1L))
         }
     }
 
