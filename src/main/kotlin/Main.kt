@@ -124,7 +124,7 @@ class Main : ListenerAdapter() {
             }
             )
             timerTask = task
-            timer.schedule(task[0], cl.time, TimeUnit.DAYS.toMillis(1L))
+            timer.scheduleAtFixedRate(task[0], cl.time, TimeUnit.DAYS.toMillis(1L))
         }
     }
 
