@@ -89,7 +89,6 @@ class Main : ListenerAdapter() {
     override fun onGuildReady(e: GuildReadyEvent) {
         if (e.guild.id == "1146405548422598778") {
             val cl: Calendar = Calendar.getInstance()
-            cl.add(Calendar.DATE, 1)
             cl.set(Calendar.HOUR_OF_DAY, 17)
             cl.set(Calendar.MINUTE, 0)
             cl.set(Calendar.SECOND, 0)
