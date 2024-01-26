@@ -27,7 +27,11 @@ import java.io.BufferedWriter
 import java.io.File
 import java.io.FileWriter
 import java.security.SecureRandom
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.ZoneId
 import java.util.*
+import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
 
@@ -38,7 +42,8 @@ fun main(args: Array<String>) {
 class Main : ListenerAdapter() {
     lateinit var FILE: File
     lateinit var NODE: ObjectNode
-    val timer: Timer = Timer()
+
+    //    val timer: Timer = Timer()
     lateinit var timerTask: Array<TimerTask>
     var ignoreParents: Array<String> = arrayOf("1179650547335299072")
     fun main(args: Array<String>) {
@@ -88,43 +93,83 @@ class Main : ListenerAdapter() {
 
     override fun onGuildReady(e: GuildReadyEvent) {
         if (e.guild.id == "1146405548422598778") {
-            val cl: Calendar = Calendar.getInstance()
-            cl.add(Calendar.DATE, 1)
-            cl.set(Calendar.HOUR_OF_DAY, 17)
-            cl.set(Calendar.MINUTE, 0)
-            cl.set(Calendar.SECOND, 0)
-            cl.set(Calendar.MILLISECOND, 0)
-            val task: Array<TimerTask> = arrayOf<TimerTask>(object : TimerTask(
-            ) {
-                override fun run() {
-                    e.guild.getTextChannelById("1197012382204039188")!!
-                        .sendMessage("**未返信チャンネルのリマインダーです。**").queue()
-                    e.guild.textChannels.filter { channel ->
-                        channel.parentCategory == null || !ignoreParents.contains(
-                            channel.parentCategoryId
-                        )
-                    }.forEach {
-                        val mes: Message = it.retrieveMessageById(it.latestMessageId).complete()
-                        val em: EmbedBuilder =
-                            EmbedBuilder().setAuthor(mes.author.effectiveName, null, mes.author.avatarUrl)
-                                .setDescription(mes.contentRaw)
-                                .setTimestamp(mes.timeCreated)
-                        if (mes.attachments.size > 0)
-                            em.setImage(mes.attachments[0].url)
-                        if (!mes.author.isBot && mes.member != null && !mes.member!!.roles.contains(
-                                e.guild.getRoleById(
-                                    "1196067979113267290"
-                                )
+//            val cl: Calendar = Calendar.getInstance()
+//            cl.add(Calendar.DATE, 1)
+//            cl.set(Calendar.HOUR_OF_DAY, 17)
+//            cl.set(Calendar.MINUTE, 0)
+//            cl.set(Calendar.SECOND, 0)
+//            cl.set(Calendar.MILLISECOND, 0)
+//            val task: Array<TimerTask> = arrayOf<TimerTask>(object : TimerTask(
+//            ) {
+//                override fun run() {
+//                    e.guild.getTextChannelById("1197012382204039188")!!
+//                        .sendMessage("**未返信チャンネルのリマインダーです。**").queue()
+//                    e.guild.textChannels.filter { channel ->
+//                        channel.parentCategory == null || !ignoreParents.contains(
+//                            channel.parentCategoryId
+//                        )
+//                    }.forEach {
+//                        val mes: Message = it.retrieveMessageById(it.latestMessageId).complete()
+//                        val em: EmbedBuilder =
+//                            EmbedBuilder().setAuthor(mes.author.effectiveName, null, mes.author.avatarUrl)
+//                                .setDescription(mes.contentRaw)
+//                                .setTimestamp(mes.timeCreated)
+//                        if (mes.attachments.size > 0)
+//                            em.setImage(mes.attachments[0].url)
+//                        if (!mes.author.isBot && mes.member != null && !mes.member!!.roles.contains(
+//                                e.guild.getRoleById(
+//                                    "1196067979113267290"
+//                                )
+//                            )
+//                        )
+//                            e.guild.getTextChannelById("1197012382204039188")!!.sendMessage(mes.jumpUrl)
+//                                .setEmbeds(em.build()).queue()
+//                    }
+//                }
+//            }
+//            )
+//            timerTask = task
+//            timer.scheduleAtFixedRate(task[0], cl.time, TimeUnit.DAYS.toMillis(1L))
+
+            val now = LocalDateTime.now()
+            var nextExecutionTime = LocalDateTime.of(now.toLocalDate(), LocalTime.of(17, 0, 0))
+            // すでに17:00:00を過ぎていた場合は次の日の同時刻に設定
+            if (now.compareTo(nextExecutionTime) > 0) {
+                nextExecutionTime = nextExecutionTime.plusDays(1)
+            }
+            // ZonedDateTimeに変換（タイムゾーンはシステムのデフォルトを使用）
+            val zonedDateTime = nextExecutionTime.atZone(ZoneId.systemDefault())
+            // ScheduledExecutorServiceを生成
+            val scheduler = Executors.newScheduledThreadPool(1)
+            // 定期的な処理を実行するRunnableを生成
+            val dailyTask = Runnable {
+                e.guild.getTextChannelById("1197012382204039188")!!
+                    .sendMessage("**未返信チャンネルのリマインダーです。**").queue()
+                e.guild.textChannels.filter { channel ->
+                    channel.parentCategory == null || !ignoreParents.contains(
+                        channel.parentCategoryId
+                    )
+                }.forEach {
+                    val mes: Message = it.retrieveMessageById(it.latestMessageId).complete()
+                    val em: EmbedBuilder =
+                        EmbedBuilder().setAuthor(mes.author.effectiveName, null, mes.author.avatarUrl)
+                            .setDescription(mes.contentRaw)
+                            .setTimestamp(mes.timeCreated)
+                    if (mes.attachments.size > 0)
+                        em.setImage(mes.attachments[0].url)
+                    if (!mes.author.isBot && mes.member != null && !mes.member!!.roles.contains(
+                            e.guild.getRoleById(
+                                "1196067979113267290"
                             )
                         )
-                            e.guild.getTextChannelById("1197012382204039188")!!.sendMessage(mes.jumpUrl)
-                                .setEmbeds(em.build()).queue()
-                    }
+                    )
+                        e.guild.getTextChannelById("1197012382204039188")!!.sendMessage(mes.jumpUrl)
+                            .setEmbeds(em.build()).queue()
                 }
             }
-            )
-            timerTask = task
-            timer.scheduleAtFixedRate(task[0], cl.time, TimeUnit.DAYS.toMillis(1L))
+            // 最初の実行を設定
+            val initialDelay = zonedDateTime.toInstant().toEpochMilli() - System.currentTimeMillis()
+            scheduler.scheduleAtFixedRate(dailyTask, initialDelay, 1, TimeUnit.DAYS)
         }
     }
 
