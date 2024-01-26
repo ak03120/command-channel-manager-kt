@@ -12,7 +12,6 @@ import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
-import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions
 import net.dv8tion.jda.api.interactions.commands.OptionType
 import net.dv8tion.jda.api.interactions.commands.build.Commands
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData
@@ -30,7 +29,6 @@ import java.security.SecureRandom
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
-import java.util.*
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
@@ -42,8 +40,10 @@ fun main(args: Array<String>) {
 class Main : ListenerAdapter() {
     lateinit var FILE: File
     lateinit var NODE: ObjectNode
+    lateinit var dailyTask: Runnable
+
     //    val timer: Timer = Timer()
-    lateinit var timerTask: Array<TimerTask>
+//    lateinit var timerTask: Array<TimerTask>
     var ignoreParents: Array<String> = arrayOf("1179650547335299072")
     fun main(args: Array<String>) {
         // データ読み込み
@@ -84,8 +84,7 @@ class Main : ListenerAdapter() {
                         SubcommandData("remove", "スタッフロールを削除します")
                             .addOption(OptionType.ROLE, "ロール", "スタッフロール", true)
                     ),
-                Commands.slash("exec", "利用不可")
-                    .setDefaultPermissions(DefaultMemberPermissions.DISABLED)
+                Commands.slash("remind", "強制的に未返信のメッセージ一覧を表示します。")
             )
             .queue()
     }
@@ -141,7 +140,7 @@ class Main : ListenerAdapter() {
             // ScheduledExecutorServiceを生成
             val scheduler = Executors.newScheduledThreadPool(1)
             // 定期的な処理を実行するRunnableを生成
-            val dailyTask = Runnable {
+            dailyTask = Runnable {
                 e.guild.getTextChannelById("1197012382204039188")!!
                     .sendMessage("**未返信チャンネルのリマインダーです。**").queue()
                 e.guild.textChannels.filter { channel ->
@@ -262,11 +261,10 @@ class Main : ListenerAdapter() {
                     else -> 404
                 }
             }
-            "exec" -> let {
-                e.deferReply().setEphemeral(true).queue()
+            "remind" -> let {
+                e.reply("未返信を表示します。").setEphemeral(true)
                 if (e.user.id == "310554809910558720") {
-                    timerTask[0].run()
-                    e.reply("Successfully executed.").setEphemeral(true)
+                    dailyTask.run()
                 }
                 return@let 0
             }
