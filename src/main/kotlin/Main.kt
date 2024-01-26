@@ -42,7 +42,6 @@ fun main(args: Array<String>) {
 class Main : ListenerAdapter() {
     lateinit var FILE: File
     lateinit var NODE: ObjectNode
-
     //    val timer: Timer = Timer()
     lateinit var timerTask: Array<TimerTask>
     var ignoreParents: Array<String> = arrayOf("1179650547335299072")
