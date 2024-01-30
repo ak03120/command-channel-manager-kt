@@ -90,6 +90,11 @@ class Main : ListenerAdapter() {
 
     override fun onReady(e: ReadyEvent) {
         val guild = e.jda.getGuildById("1146405548422598778")!!
+        val today: Calendar = Calendar.getInstance()
+        today.set(Calendar.HOUR_OF_DAY, 0)
+        today.set(Calendar.MINUTE, 0)
+        today.set(Calendar.SECOND, 0)
+        today.set(Calendar.MILLISECOND, 0)
         val cl: Calendar = Calendar.getInstance()
         //cl.add(Calendar.DATE, 1)
         cl.set(Calendar.HOUR_OF_DAY, 17)
@@ -105,8 +110,9 @@ class Main : ListenerAdapter() {
         val task: Array<TimerTask> = arrayOf<TimerTask>(object : TimerTask(
         ) {
             override fun run() {
-                guild.getTextChannelById("1197012382204039188")!!
-                    .sendMessage("**未返信チャンネルのリマインダーです。**").queue()
+                val tc: TextChannel = guild.getTextChannelById("1197012382204039188")!!
+                //val tc: TextChannel = guild.getTextChannelById("1194853669590532106")!! // test
+                tc.sendMessage("**未返信チャンネルのリマインダーです。**").queue()
                 guild.textChannels.filter { channel ->
                     channel.parentCategory == null || !ignoreParents.contains(
                         channel.parentCategoryId
@@ -114,6 +120,7 @@ class Main : ListenerAdapter() {
                 }.forEach {
                     try {
                         val mes: Message = it.retrieveMessageById(it.latestMessageId).complete()
+                        if (mes.timeCreated.toInstant().isBefore(today.toInstant())) return@forEach
                         val em: EmbedBuilder =
                             EmbedBuilder().setAuthor(mes.author.effectiveName, null, mes.author.avatarUrl)
                                 .setDescription(mes.contentRaw)
@@ -126,8 +133,7 @@ class Main : ListenerAdapter() {
                                 )
                             )
                         )
-                            guild.getTextChannelById("1197012382204039188")!!.sendMessage(mes.jumpUrl)
-                                .setEmbeds(em.build()).queue()
+                            tc.sendMessage(mes.jumpUrl).setEmbeds(em.build()).queue()
                     } catch (ignored: Exception) {
                         ignored.printStackTrace()
                     }

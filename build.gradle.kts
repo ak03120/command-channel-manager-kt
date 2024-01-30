@@ -13,7 +13,7 @@ repositories {
 
 dependencies {
     testImplementation(kotlin("test"))
-    implementation("net.dv8tion:JDA:5.0.0-beta.13")
+    implementation("net.dv8tion:JDA:5.0.0-beta.20")
     implementation("com.fasterxml.jackson.core:jackson-databind:2.15.2")
 }
 
