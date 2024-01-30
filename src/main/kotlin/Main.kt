@@ -112,21 +112,25 @@ class Main : ListenerAdapter() {
                         channel.parentCategoryId
                     )
                 }.forEach {
-                    val mes: Message = it.retrieveMessageById(it.latestMessageId).complete()
-                    val em: EmbedBuilder =
-                        EmbedBuilder().setAuthor(mes.author.effectiveName, null, mes.author.avatarUrl)
-                            .setDescription(mes.contentRaw)
-                            .setTimestamp(mes.timeCreated)
-                    if (mes.attachments.size > 0)
-                        em.setImage(mes.attachments[0].url)
-                    if (!mes.author.isBot && mes.member != null && !mes.member!!.roles.contains(
-                            guild.getRoleById(
-                                "1196067979113267290"
+                    try {
+                        val mes: Message = it.retrieveMessageById(it.latestMessageId).complete()
+                        val em: EmbedBuilder =
+                            EmbedBuilder().setAuthor(mes.author.effectiveName, null, mes.author.avatarUrl)
+                                .setDescription(mes.contentRaw)
+                                .setTimestamp(mes.timeCreated)
+                        if (mes.attachments.size > 0)
+                            em.setImage(mes.attachments[0].url)
+                        if (!mes.author.isBot && mes.member != null && !mes.member!!.roles.contains(
+                                guild.getRoleById(
+                                    "1196067979113267290"
+                                )
                             )
                         )
-                    )
-                        guild.getTextChannelById("1197012382204039188")!!.sendMessage(mes.jumpUrl)
-                            .setEmbeds(em.build()).queue()
+                            guild.getTextChannelById("1197012382204039188")!!.sendMessage(mes.jumpUrl)
+                                .setEmbeds(em.build()).queue()
+                    } catch (ignored: Exception) {
+                        ignored.printStackTrace()
+                    }
                 }
             }
         }
