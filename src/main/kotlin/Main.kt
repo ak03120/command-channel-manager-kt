@@ -12,6 +12,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.events.session.ReadyEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
+import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions
 import net.dv8tion.jda.api.interactions.commands.OptionType
 import net.dv8tion.jda.api.interactions.commands.build.Commands
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData
@@ -82,6 +83,7 @@ class Main : ListenerAdapter() {
                             .addOption(OptionType.ROLE, "ロール", "スタッフロール", true)
                     ),
                 Commands.slash("remind", "強制的に未返信のメッセージ一覧を表示します。")
+                    .setDefaultPermissions(DefaultMemberPermissions.DISABLED)
             )
             .queue()
     }
@@ -96,7 +98,7 @@ class Main : ListenerAdapter() {
         cl.set(Calendar.MILLISECOND, 0)
         if (cl.before(Calendar.getInstance())) {
             cl.add(Calendar.DAY_OF_MONTH, 1)
-            }
+        }
         // 結果を表示
         System.out.println("Adjusted Calendar: " + cl.getTime())
 
@@ -265,10 +267,8 @@ class Main : ListenerAdapter() {
                 }
             }
             "remind" -> let {
-                e.reply("未返信を表示します。").setEphemeral(true)
-                if (e.user.id == "310554809910558720") {
-                    timerTask[0].run()
-                }
+                e.reply("未返信のメッセージを取得中です。").setEphemeral(true)
+                timerTask[0].run()
                 return@let 0
             }
             else -> 404
