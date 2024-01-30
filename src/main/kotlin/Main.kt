@@ -267,7 +267,7 @@ class Main : ListenerAdapter() {
                 }
             }
             "remind" -> let {
-                e.reply("未返信のメッセージを取得中です。").setEphemeral(true)
+                e.reply("未返信のメッセージを取得中です。").setEphemeral(true).queue()
                 timerTask[0].run()
                 return@let 0
             }
